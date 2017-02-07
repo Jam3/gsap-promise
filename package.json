@@ -1,5 +1,5 @@
 {
-  "name": "gsap-promise",
+  "name": "@Jam3/gsap-promise",
   "version": "2.0.0",
   "description": "a Promise wrapper around gsap / twenelite",
   "main": "index.js",
