@@ -1,5 +1,7 @@
+require('babel-polyfill')
+
 var animate = require('./')
-var test = require('tape').test
+var test = require('tape')
 
 test('a Promise wrapper around gsap / twenelite', function(t) {
 	t.plan(7)
@@ -23,33 +25,18 @@ test('a Promise wrapper around gsap / twenelite', function(t) {
 		t.equal(c.value, 5, 'animate.fromTo works')
 	})
 
-	var d = {value: 0};
-	animate
-		.fromTo(d, 0.5, { value: 0 }, { value: 100 })
-		.delay(100)
-		.cancel()
-		.delay(500)
-		.then(function () {
-			t.assert(d.value < 100, 'fromTo cancelling works')
-		})
+	var q = { value: 10 }
+	animate.to(q, 1.0, { value: 2 }).then(function() {
+		t.ok(true, 'animate.to can be overridden')
+	})
 
-	var e = [{value: 100}, {value: 100}, {value: 100}]
-	animate
-		.staggerFrom(e, 0.5, { value: 0 }, 0.1)
-		.delay(100)
-		.cancel()
-		.delay(1000)
-		.then(function () {
-			t.assert(e.slice(-1)[0].value < 100, 'staggerFrom cancelling works')
-		})
+	animate.to(q, 1.0, { value: 5, overwrite: 'all' }).then(function() {
+		t.equal(q.value, 5, 'animate.to override result')
+	})
 
-	animate
-		.staggerFromTo(e, 0.5, { value: 0 }, { value: 100 }, 0.1)
-		.delay(100)
-		.cancel()
-		.delay(1000)
-		.then(function () {
-			t.assert(e.slice(-1)[0].value < 100, 'staggerFromTo cancelling works')
-		})
-
+	var k = { value: 0 }
+	animate.to(k, 1.0, { value: 5 }).then(function() {
+		t.equal(k.value, 0, 'animate.killTweensOf works')
+	})
+	animate.killTweensOf(k)
 })

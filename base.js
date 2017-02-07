@@ -1,14 +1,13 @@
 var TweenMax = require('gsap')
+var noop = function () {}
 
 module.exports = function(Promise) {
 	function animateFunc(func, element, duration, opts) {
 		opts = opts||{}
-		var tween
-		return new Promise(function(resolve, reject) {
-			opts.onComplete = resolve
-			tween = func(element, duration, opts)
-		}).cancellable().catch(Promise.CancellationError, function(e) {
-				tween.kill()
+		return new Promise(function(resolve) {
+			resolve = once(resolve)
+			wrapCompletion(opts, resolve)
+			wrapTween(func(element, duration, opts), resolve)
 		})
 	}
 
@@ -20,45 +19,73 @@ module.exports = function(Promise) {
 	
 	util.set = function animateSet(element, params) {
 		params = params||{}
-		return new Promise(function(resolve, reject) {
-			params.onComplete = resolve
-			TweenMax.set(element, params)
+		return new Promise(function(resolve) {
+			resolve = once(resolve)
+			wrapCompletion(params, resolve)
+			wrapTween(TweenMax.set(element, params), resolve)
 		})
 	}
 
 	util.fromTo = function animateFromTo(element, duration, from, to) {
 		to = to||{}
-		var tween
-		return new Promise(function(resolve, reject) {
-			to.onComplete = resolve
-			tween = TweenMax.fromTo(element, duration, from, to)
-		}).cancellable().catch(Promise.CancellationError, function(e) {
-				tween.kill()
+		return new Promise(function(resolve) {
+			resolve = once(resolve)
+			wrapCompletion(to, resolve)
+			wrapTween(TweenMax.fromTo(element, duration, from, to), resolve)
 		})
 	}
 
 	;['staggerTo', 'staggerFrom'].forEach(function(fn) {
 		var tweenFunc = TweenMax[fn]
-		var tweens
 		util[fn] = function(element, duration, from, stagger) {
-			return new Promise(function(resolve, reject) {
-				tweens = tweenFunc(element, duration, from, stagger, resolve)
-			}).cancellable().catch(Promise.CancellationError, function(e) {
-				tweens.forEach( function (tween) { tween.kill() })
+			return new Promise(function(resolve) {
+				resolve = once(resolve)
+				wrapTween(tweenFunc(element, duration, from, stagger, resolve), resolve)
 			})
 		}
 	})
 
-	util.staggerFromTo = function staggerFromTo(element, duration, from, to, stagger, position) {
-		var tweens
-		return new Promise(function(resolve, reject) {
-			tweens = TweenMax.staggerFromTo(element, duration, from, to, stagger, resolve)
-		}).cancellable().catch(Promise.CancellationError, function(e) {
-			tweens.forEach( function (tween) { tween.kill() })
+	util.staggerFromTo = function staggerFromTo(element, duration, from, to, stagger) {
+		return new Promise(function(resolve) {
+			resolve = once(resolve)
+			wrapTween(TweenMax.staggerFromTo(element, duration, from, to, stagger, resolve), resolve)
 		})
 	}
 
-
+	util.killTweensOf = TweenMax.killTweensOf.bind(TweenMax)
 	util.all = Promise.all
 	return util
+
+	function once (resolve) {
+		// call resolve only once
+		var done = function (ev) {
+			resolve(ev)
+			resolve = noop
+		}
+		return done
+	}
+
+	function wrapCompletion (p, done) {
+		// handle both completion events
+		p.onComplete = done
+		p.onOverwrite = done
+	}
+
+	function wrapTween (tween, resolve) {
+		// GSAP won't call onComplete or onOverwrite with { override: 'all' }
+		if (typeof tween._kill === 'function' && !tween._isGSAPPromiseWrapped) {
+			tween._isGSAPPromiseWrapped = true;
+			var oldKill = tween._kill;
+			tween._kill = function (vars) {
+				var self = this
+				var args = Array.prototype.slice.call(arguments);
+				if (vars === 'all' || vars === null || typeof vars === 'undefined') {
+					process.nextTick(function () {
+						resolve(self)
+					})
+				}
+				return oldKill.apply(this, args);
+			}
+		}
+	}
 }

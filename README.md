@@ -15,6 +15,8 @@ Promise.all([
 })
 ```
 
+**Note:** Version 2.x uses `global.Promise` (you will need to polyfill it yourself). If you want a promise implementation, switch to 1.x which defaults to using Bluebird.
+
 ## Usage
 
 [![NPM](https://nodei.co/npm/gsap-promise.png)](https://nodei.co/npm/gsap-promise/)
@@ -34,6 +36,10 @@ Matches the TweenMax methods by the same name, but returns a Promise for the onC
 #### ```animate.all(element)```
 
 An alias for `Promise.all`, which will trigger all tweens in parallel.
+
+#### ```animate.killTweensOf(elements)```
+
+An alias for `gsap.killTweensOf(elements)`.
 
 #### ```animate(element, duration, params)```
 
