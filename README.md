@@ -21,7 +21,7 @@ Promise.all([
 
 [![NPM](https://nodei.co/npm/gsap-promise.png)](https://nodei.co/npm/gsap-promise/)
 
-This promisifies the `TweenMax` methods: `to`, `from`, `set` and `fromTo`. This uses Bluebird, and has basic support for cancellation. 
+This promisifies the `TweenMax` methods: `to`, `from`, `set` and `fromTo`.
 
 #### ```animate.to(element, duration, params)```
 #### ```animate.from(element, duration, from)```

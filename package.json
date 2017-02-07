@@ -10,7 +10,6 @@
     "url": "https://github.com/mattdesl"
   },
   "dependencies": {
-    "bluebird": "^2.9.21",
     "gsap": "^1.19.1"
   },
   "devDependencies": {
