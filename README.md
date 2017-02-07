@@ -1,4 +1,4 @@
-# @Jam3/gsap-promise
+# @jam3/gsap-promise
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
