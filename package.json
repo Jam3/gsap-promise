@@ -1,6 +1,6 @@
 {
   "name": "@jam3/gsap-promise",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "a Promise wrapper around gsap / twenelite",
   "main": "index.js",
   "license": "MIT",
