@@ -27,10 +27,10 @@
   "keywords": [],
   "repository": {
     "type": "git",
-    "url": "git://github.com/mattdesl/gsap-promise.git"
+    "url": "git://github.com/Jam3/gsap-promise.git"
   },
-  "homepage": "https://github.com/mattdesl/gsap-promise",
+  "homepage": "https://github.com/Jam3/gsap-promise",
   "bugs": {
-    "url": "https://github.com/mattdesl/gsap-promise/issues"
+    "url": "https://github.com/Jam3/gsap-promise/issues"
   }
 }
