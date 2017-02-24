@@ -57,7 +57,7 @@ module.exports = function(Promise) {
 	util.all = Promise.all
 
 	// expose original gsap for non-promise interface
-	util.gsap = gsap;
+	util.TweenMax = TweenMax;
 	return util
 
 	function once (resolve) {
