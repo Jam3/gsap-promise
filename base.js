@@ -55,6 +55,9 @@ module.exports = function(Promise) {
 
 	util.killTweensOf = TweenMax.killTweensOf.bind(TweenMax)
 	util.all = Promise.all
+
+	// expose original gsap for non-promise interface
+	util.gsap = gsap;
 	return util
 
 	function once (resolve) {
