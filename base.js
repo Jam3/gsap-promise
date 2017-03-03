@@ -7,8 +7,8 @@ module.exports = function(Promise) {
 		opts = assign({}, opts)
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
-			wrapCompletion(opts, resolve)
-			wrapTween(func(element, duration, opts), resolve)
+			wrapCompletion(opts, resolve, opts)
+			wrapTween(func(element, duration, opts), resolve, opts)
 		})
 	}
 
@@ -22,8 +22,8 @@ module.exports = function(Promise) {
 		opts = assign({}, opts)
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
-			wrapCompletion(opts, resolve)
-			wrapTween(TweenMax.set(element, opts), resolve)
+			wrapCompletion(opts, resolve, opts)
+			wrapTween(TweenMax.set(element, opts), resolve, opts)
 		})
 	}
 
@@ -31,8 +31,8 @@ module.exports = function(Promise) {
 		to = assign({}, to)
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
-			wrapCompletion(to, resolve)
-			wrapTween(TweenMax.fromTo(element, duration, from, to), resolve)
+			wrapCompletion(to, resolve, from)
+			wrapTween(TweenMax.fromTo(element, duration, from, to), resolve, from)
 		})
 	}
 
@@ -41,7 +41,7 @@ module.exports = function(Promise) {
 		util[fn] = function(element, duration, from, stagger) {
 			return new Promise(function(resolve) {
 				resolve = once(resolve)
-				wrapTween(tweenFunc(element, duration, from, stagger, resolve), resolve)
+				wrapTween(tweenFunc(element, duration, from, stagger, resolve), resolve, from)
 			})
 		}
 	})
@@ -49,7 +49,7 @@ module.exports = function(Promise) {
 	util.staggerFromTo = function staggerFromTo(element, duration, from, to, stagger) {
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
-			wrapTween(TweenMax.staggerFromTo(element, duration, from, to, stagger, resolve), resolve)
+			wrapTween(TweenMax.staggerFromTo(element, duration, from, to, stagger, resolve), resolve, from)
 		})
 	}
 
@@ -69,13 +69,17 @@ module.exports = function(Promise) {
 		return done
 	}
 
-	function wrapCompletion (p, done) {
-		// handle both completion events
+	function wrapCompletion (p, done, opts = {}) {
 		p.onComplete = done
+		if (!opts || !opts.callThenOnKill) return;
+		delete opts.callThenOnKill
 		p.onOverwrite = done
 	}
 
-	function wrapTween (tween, resolve) {
+	function wrapTween (tween, resolve, opts = {}) {
+		if (!opts || !opts.callThenOnKill) return;
+		delete opts.callThenOnKill
+
 		// GSAP won't call onComplete or onOverwrite with { override: 'all' }
 		if (typeof tween._kill === 'function' && !tween._isGSAPPromiseWrapped) {
 			tween._isGSAPPromiseWrapped = true;
