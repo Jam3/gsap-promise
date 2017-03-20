@@ -69,14 +69,16 @@ module.exports = function(Promise) {
 		return done
 	}
 
-	function wrapCompletion (p, done, opts = {}) {
+	function wrapCompletion (p, done, opts) {
+		opts = opts || {}
 		p.onComplete = done
 		if (!opts || !opts.callThenOnKill) return;
 		delete opts.callThenOnKill
 		p.onOverwrite = done
 	}
 
-	function wrapTween (tween, resolve, opts = {}) {
+	function wrapTween (tween, resolve, opts) {
+		opts = opts || {}
 		if (!opts || !opts.callThenOnKill) return;
 		delete opts.callThenOnKill
 
