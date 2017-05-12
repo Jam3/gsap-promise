@@ -4,7 +4,7 @@ var animate = require('./')
 var test = require('tape')
 
 test('a Promise wrapper around gsap / twenelite', function(t) {
-	t.plan(7)
+	t.plan(6)
 
 	t.equal(animate, animate.to, 'animate equals animate.to')
 
@@ -26,17 +26,11 @@ test('a Promise wrapper around gsap / twenelite', function(t) {
 	})
 
 	var q = { value: 10 }
-	animate.to(q, 1.0, { value: 2 }).then(function() {
+	animate.to(q, 1.0, { value: 2, callThenOnKill: true }).then(function() {
 		t.ok(true, 'animate.to can be overridden')
 	})
 
 	animate.to(q, 1.0, { value: 5, overwrite: 'all' }).then(function() {
 		t.equal(q.value, 5, 'animate.to override result')
 	})
-
-	var k = { value: 0 }
-	animate.to(k, 1.0, { value: 5 }).then(function() {
-		t.equal(k.value, 0, 'animate.killTweensOf works')
-	})
-	animate.killTweensOf(k)
 })

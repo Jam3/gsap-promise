@@ -1,10 +1,10 @@
-var TweenMax = require('gsap')
 var assign = require('object-assign')
 var noop = function () {}
 
-module.exports = function(Promise) {
+module.exports = function(Promise, TweenMax) {
 	function animateFunc(func, element, duration, opts) {
 		opts = assign({}, opts)
+		guardAgainstNull(element)
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
 			wrapCompletion(opts, resolve, opts)
@@ -20,6 +20,7 @@ module.exports = function(Promise) {
 	
 	util.set = function animateSet(element, opts) {
 		opts = assign({}, opts)
+		guardAgainstNull(element)
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
 			wrapCompletion(opts, resolve, opts)
@@ -29,6 +30,7 @@ module.exports = function(Promise) {
 
 	util.fromTo = function animateFromTo(element, duration, from, to) {
 		to = assign({}, to)
+		guardAgainstNull(element)
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
 			wrapCompletion(to, resolve, from)
@@ -39,6 +41,7 @@ module.exports = function(Promise) {
 	;['staggerTo', 'staggerFrom'].forEach(function(fn) {
 		var tweenFunc = TweenMax[fn]
 		util[fn] = function(element, duration, from, stagger) {
+			guardAgainstNull(element)
 			return new Promise(function(resolve) {
 				resolve = once(resolve)
 				wrapTween(tweenFunc(element, duration, from, stagger, resolve), resolve, from)
@@ -47,6 +50,7 @@ module.exports = function(Promise) {
 	})
 
 	util.staggerFromTo = function staggerFromTo(element, duration, from, to, stagger) {
+		guardAgainstNull(element)
 		return new Promise(function(resolve) {
 			resolve = once(resolve)
 			wrapTween(TweenMax.staggerFromTo(element, duration, from, to, stagger, resolve), resolve, from)
@@ -57,7 +61,7 @@ module.exports = function(Promise) {
 	util.all = Promise.all
 
 	// expose original gsap for non-promise interface
-	util.TweenMax = TweenMax;
+	util.TweenMax = TweenMax
 	return util
 
 	function once (resolve) {
@@ -69,32 +73,44 @@ module.exports = function(Promise) {
 		return done
 	}
 
+	function guardAgainstNull (el) {
+		if (!el) throw new Error('gsap: Cannot tween a null target')
+		if (Array.isArray(el)) {
+			const isFalsey = el.some(function (e) {
+				return !e
+			})
+			if (isFalsey) {
+				throw new Error('gsap: Cannot tween a null target - ' + 
+					' some elements in the array are undefined.')
+			}
+		}
+	}
+
 	function wrapCompletion (p, done, opts) {
 		opts = opts || {}
 		p.onComplete = done
-		if (!opts || !opts.callThenOnKill) return;
-		delete opts.callThenOnKill
+		if (!opts || !opts.callThenOnKill) return
 		p.onOverwrite = done
 	}
 
 	function wrapTween (tween, resolve, opts) {
 		opts = opts || {}
-		if (!opts || !opts.callThenOnKill) return;
+		if (!opts || !opts.callThenOnKill) return
 		delete opts.callThenOnKill
 
 		// GSAP won't call onComplete or onOverwrite with { override: 'all' }
 		if (typeof tween._kill === 'function' && !tween._isGSAPPromiseWrapped) {
-			tween._isGSAPPromiseWrapped = true;
-			var oldKill = tween._kill;
+			tween._isGSAPPromiseWrapped = true
+			var oldKill = tween._kill
 			tween._kill = function (vars) {
 				var self = this
-				var args = Array.prototype.slice.call(arguments);
+				var args = Array.prototype.slice.call(arguments)
 				if (vars === 'all' || vars === null || typeof vars === 'undefined') {
 					process.nextTick(function () {
 						resolve(self)
 					})
 				}
-				return oldKill.apply(this, args);
+				return oldKill.apply(this, args)
 			}
 		}
 	}
