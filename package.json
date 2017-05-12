@@ -10,7 +10,6 @@
     "url": "https://github.com/mattdesl"
   },
   "dependencies": {
-    "eases": "^1.0.8",
     "object-assign": "^4.1.1"
   },
   "devDependencies": {
